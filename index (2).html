@@ -1,0 +1,947 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cổng Giáo Viên - THPT Phan Chu Trinh</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-btn { flex: 1; padding: .5rem; border-radius: .75rem; font-size: .75rem; font-weight: 700; color: #64748b; }
+    .tab-btn.active { background: #fff; color: #2563eb; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+
+  <!-- HEADER -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <img src="https://i.postimg.cc/tgqnyg3p/logo-pct.jpg" alt="Logo" class="w-9 h-9 object-contain rounded-full" onerror="this.style.display='none'">
+        <div>
+          <h1 class="text-sm font-bold leading-tight">CỔNG GIÁO VIÊN</h1>
+          <p class="text-[10px] text-slate-500 uppercase tracking-wide">THPT Phan Chu Trinh - Cư Jút</p>
+        </div>
+      </div>
+      <div id="userArea" class="hidden items-center gap-2">
+        <div class="text-right">
+          <p id="badgeName" class="text-xs font-bold leading-tight"></p>
+          <span id="badgeRole" class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-semibold"></span>
+        </div>
+        <button id="btnRefresh" onclick="refreshData()" title="Cập nhật dữ liệu" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600">
+          <i id="refreshIcon" class="fa-solid fa-rotate text-xs"></i>
+        </button>
+        <button onclick="openModal('modalPass')" title="Đổi mật khẩu" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-blue-50 text-slate-500 hover:text-blue-600">
+          <i class="fa-solid fa-key text-xs"></i>
+        </button>
+        <button onclick="logout()" title="Đăng xuất" class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600">
+          <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 py-4 pb-10">
+
+    <!-- ĐĂNG NHẬP -->
+    <section id="secLogin" class="pt-4">
+      <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 text-center">
+        <img src="https://i.postimg.cc/FsxdFC4T/hinh-dai-dien-nha-truong.png" alt="Trường THPT Phan Chu Trinh" class="w-full max-h-44 object-cover rounded-2xl mb-4" onerror="this.style.display='none'">
+        <h2 class="text-base font-extrabold mb-1">ĐĂNG NHẬP HỆ THỐNG</h2>
+        <p class="text-xs text-slate-500 mb-5">Dành cho giáo viên, tổ trưởng và hiệu phó</p>
+
+        <form id="formLogin" class="space-y-4 text-left">
+          <div>
+            <label class="block text-xs font-bold mb-1">Tài khoản</label>
+            <input id="inTK" required autocomplete="username" placeholder="Ví dụ: anhnt"
+                   class="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-bold mb-1">Mật khẩu</label>
+            <div class="relative">
+              <input id="inMK" type="password" required autocomplete="current-password"
+                     class="w-full pl-3 pr-10 py-2.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+              <button type="button" onclick="togglePass()" title="Hiện / ẩn mật khẩu"
+                      class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                <i id="eyeIcon" class="fa-regular fa-eye text-sm"></i>
+              </button>
+            </div>
+          </div>
+          <div id="loginErr" class="hidden text-xs text-rose-600 bg-rose-50 p-2.5 rounded-xl border border-rose-200"></div>
+          <button id="btnLogin" type="submit" class="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm">
+            Đăng nhập
+          </button>
+        </form>
+        <p class="text-[11px] text-slate-400 mt-4">Mật khẩu ban đầu do nhà trường cấp. Bạn có thể đổi trong mục đổi mật khẩu sau khi đăng nhập.</p>
+      </div>
+    </section>
+
+    <!-- ỨNG DỤNG -->
+    <section id="secApp" class="hidden space-y-4 pt-2">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-4 text-white shadow-md">
+        <p class="text-xs text-blue-200">Xin chào,</p>
+        <h3 id="welName" class="text-lg font-extrabold"></h3>
+        <p id="welInfo" class="text-xs text-blue-100"></p>
+      </div>
+
+      <nav class="flex bg-slate-200/80 p-1 rounded-xl gap-1 text-slate-600">
+        <button class="tab-btn active" data-tab="ks" onclick="setTab('ks')">Online</button>
+        <button class="tab-btn" data-tab="cv" onclick="setTab('cv')">Công văn</button>
+        <button class="tab-btn hidden" data-tab="to" id="tabTo" onclick="setTab('to')">Tổ</button>
+        <button class="tab-btn hidden" data-tab="admin" id="tabAdmin" onclick="setTab('admin')">Quản trị</button>
+      </nav>
+
+      <!-- Tab: Cuộc thi & Khảo sát -->
+      <div id="pnl-ks" class="panel space-y-3">
+        <div id="listOnline" class="space-y-3"></div>
+      </div>
+
+      <!-- Tab: Công văn -->
+      <div id="pnl-cv" class="panel hidden space-y-3">
+        <div id="cvFilter" class="flex gap-1.5 overflow-x-auto pb-1"></div>
+        <div id="listCV" class="space-y-3"></div>
+      </div>
+
+      <!-- Tab: Tổ (TT, TP, HP) -->
+      <div id="pnl-to" class="panel hidden space-y-3">
+        <!-- Tổ trưởng / tổ phó -->
+        <div id="tlWrap" class="space-y-3">
+          <select id="teamKS" onchange="loadTeamMembers()" class="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-300 bg-white"></select>
+          <p id="teamSummary" class="text-xs font-bold text-slate-600"></p>
+          <div id="teamList" class="space-y-2"></div>
+        </div>
+        <!-- Hiệu phó: chọn tổ rồi xem thành viên -->
+        <div id="hpWrap" class="hidden space-y-3">
+          <div id="hpTeamList" class="space-y-2"></div>
+          <div id="hpTeamDetail" class="hidden space-y-3">
+            <button onclick="loadHPTo()" class="text-xs font-bold text-blue-600"><i class="fa-solid fa-arrow-left mr-1"></i>Danh sách tổ</button>
+            <h4 id="hpTeamName" class="font-bold text-sm"></h4>
+            <select id="hpTeamItem" onchange="loadHPTeamMembers()" class="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-300 bg-white"></select>
+            <p id="hpTeamSummary" class="text-xs font-bold text-slate-600"></p>
+            <div id="hpTeamMembers" class="space-y-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Quản trị (HP) -->
+      <div id="pnl-admin" class="panel hidden space-y-5">
+        <form id="formKS" onsubmit="submitKS(event)" class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
+          <h4 class="text-sm font-bold">Đăng Online</h4>
+          <input id="inKSTen" required placeholder="Tên khảo sát" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <textarea id="inKSMoTa" rows="2" placeholder="Mô tả ngắn" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300"></textarea>
+          <input id="inKSLink" required placeholder="Link khảo sát (https://...)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <input id="inKSDoiTuong" list="dsTo" value="Toàn trường" placeholder="Toàn trường hoặc tên tổ, cách nhau dấu phẩy"
+                 class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <input id="inKSHan" type="date" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Đăng khảo sát</button>
+        </form>
+
+        <form id="formTB" onsubmit="submitTB(event)" class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
+          <h4 class="text-sm font-bold">Đăng công văn</h4>
+          <select id="selTBPhanLoai" required class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
+            <option value="">-- Chọn phân loại --</option>
+            <option value="TB nhà trường">TB nhà trường</option>
+            <option value="VB phổ biến PL">VB phổ biến PL</option>
+            <option value="Góp ý VB">Góp ý VB</option>
+          </select>
+          <input id="inTBSoHieu" placeholder="Số hiệu (ví dụ: 123/PCTCJ-THPT)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <input id="inTBTieuDe" required placeholder="Tiêu đề" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <textarea id="inTBMoTa" rows="2" placeholder="Mô tả / thể lệ / nội dung chính" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300"></textarea>
+          <input id="inTBLink" placeholder="Link Google Drive của công văn" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <input id="inTBDoiTuong" list="dsTo" value="Toàn trường" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <input id="inTBHan" type="date" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Đăng</button>
+        </form>
+
+        <div class="space-y-2">
+          <h4 class="text-sm font-bold">Thu hồi / mở lại nội dung</h4>
+          <div id="listQT" class="space-y-2"></div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-4 border border-slate-200 space-y-3">
+          <h4 class="text-sm font-bold">Xuất kết quả khảo sát</h4>
+          <select id="selExpKS" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300"></select>
+          <select id="selExpFmt" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+            <option value="xlsx">Excel (.xlsx)</option>
+            <option value="pdf">PDF</option>
+          </select>
+          <button id="btnExport" onclick="exportReport()" class="w-full py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-bold">Xuất báo cáo</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <datalist id="dsTo"></datalist>
+
+  <!-- MODAL: NỘP BÁO CÁO -->
+  <div id="modalReport" class="hidden">
+    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <form onsubmit="submitReport(event)" class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3">
+        <h4 class="font-bold text-sm">Báo cáo hoàn thành</h4>
+        <p id="repTitle" class="text-xs text-slate-600"></p>
+        <div>
+          <label class="block text-xs font-bold mb-1">Minh chứng (không bắt buộc)</label>
+          <input id="repFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf" class="w-full text-xs">
+          <p class="text-[10px] text-slate-400 mt-1">Ảnh hoặc PDF, tối đa 10MB.</p>
+        </div>
+        <div class="flex gap-2">
+          <button type="button" onclick="closeModal('modalReport')" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-sm font-bold">Hủy</button>
+          <button id="btnRep" type="submit" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Gửi báo cáo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ĐỔI MẬT KHẨU -->
+  <div id="modalPass" class="hidden">
+    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <form onsubmit="submitPass(event)" class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3">
+        <h4 class="font-bold text-sm">Đổi mật khẩu</h4>
+        <input id="pwOld" type="password" required placeholder="Mật khẩu hiện tại" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <input id="pwNew" type="password" required minlength="6" placeholder="Mật khẩu mới (tối thiểu 6 ký tự)" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <input id="pwNew2" type="password" required minlength="6" placeholder="Nhập lại mật khẩu mới" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <div class="flex gap-2">
+          <button type="button" onclick="closeModal('modalPass')" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-sm font-bold">Hủy</button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: SỬA NỘI DUNG (HP) -->
+  <div id="modalEdit" class="hidden">
+    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <form onsubmit="submitEdit(event)" class="bg-white rounded-2xl p-5 w-full max-w-sm space-y-3 max-h-[90vh] overflow-y-auto">
+        <h4 class="font-bold text-sm">Sửa nội dung</h4>
+        <select id="eLoai" class="hidden w-full px-3 py-2 text-sm rounded-xl border border-slate-300 bg-white">
+          <option value="">-- Chọn phân loại --</option>
+          <option value="TB nhà trường">TB nhà trường</option>
+          <option value="VB phổ biến PL">VB phổ biến PL</option>
+          <option value="Góp ý VB">Góp ý VB</option>
+        </select>
+        <input id="eSoHieu" placeholder="Số hiệu" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <input id="eTitle" required placeholder="Tên / tiêu đề" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <textarea id="eDesc" rows="3" placeholder="Mô tả / thể lệ" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300"></textarea>
+        <input id="eLink" placeholder="Link" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <input id="eDoiTuong" list="dsTo" placeholder="Toàn trường hoặc tổ, cách nhau dấu phẩy" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <input id="eHan" type="date" class="w-full px-3 py-2 text-sm rounded-xl border border-slate-300">
+        <div class="flex gap-2">
+          <button type="button" onclick="closeModal('modalEdit')" class="flex-1 py-2.5 rounded-xl bg-slate-100 text-sm font-bold">Hủy</button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-bold">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: THỐNG KÊ THEO TỔ (HP) -->
+  <div id="modalStats" class="hidden">
+    <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl p-5 w-full max-w-sm max-h-[85vh] overflow-y-auto space-y-3">
+        <div class="flex justify-between items-start gap-2">
+          <h4 id="statTitle" class="font-bold text-sm"></h4>
+          <button onclick="closeModal('modalStats')" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+        </div>
+        <p id="statOverall" class="text-xs font-bold text-slate-600"></p>
+        <div id="statList" class="space-y-2"></div>
+        <button onclick="deleteItem(statCurrentId)" class="w-full py-2 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold">
+          <i class="fa-solid fa-trash-can mr-1"></i>Xóa mục này (tạo nhầm)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- THÔNG BÁO NHANH -->
+  <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs px-4 py-2.5 rounded-xl shadow-lg z-50"></div>
+
+  <script>
+    const OPEN = "Đang mở";
+    const API_URL = "https://script.google.com/macros/s/AKfycbwXqUwHwXiapFV8QeMtQTbmc8B56ca7VfyjaNXR7JEj90PZuCulwEZulaLJvZnhQFz9XA/exec";
+    let session = null;
+    let reportId = "";
+
+    const el = id => document.getElementById(id);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+    /** Gọi hàm phía server (Apps Script) qua POST, trả về Promise */
+    async function call(fn, ...args) {
+      let r;
+      try {
+        // text/plain để tránh bước kiểm tra trước (preflight) mà Apps Script không hỗ trợ
+        r = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ fn: fn, args: args })
+        });
+      } catch (e) {
+        throw new Error("Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.");
+      }
+      if (!r.ok) throw new Error("Máy chủ báo lỗi (" + r.status + ").");
+      return await r.json();
+    }
+
+    function handleFail(msg) {
+      alert(msg);
+      if (/hết hạn/.test(msg)) logout();
+    }
+
+    function toast(msg) {
+      el("toast").textContent = msg;
+      el("toast").classList.remove("hidden");
+      setTimeout(() => el("toast").classList.add("hidden"), 3000);
+    }
+
+    function openModal(id) { el(id).classList.remove("hidden"); }
+    function closeModal(id) { el(id).classList.add("hidden"); }
+
+    function roleLabel(u) {
+      if (u.role === "HP") return "Hiệu phó";
+      if (u.role === "TRUONG_TO") return "Tổ trưởng / tổ phó";
+      return "Giáo viên";
+    }
+
+    // ========== ĐĂNG NHẬP ==========
+    el("formLogin").addEventListener("submit", async e => {
+      e.preventDefault();
+      el("loginErr").classList.add("hidden");
+      el("btnLogin").disabled = true;
+      try {
+        const res = await call("dangNhap", el("inTK").value.trim(), el("inMK").value);
+        if (!res.success) {
+          el("loginErr").textContent = res.message;
+          el("loginErr").classList.remove("hidden");
+          return;
+        }
+        session = { token: res.token, user: res.user };
+        enterApp();
+      } catch (ex) {
+        el("loginErr").textContent = ex.message;
+        el("loginErr").classList.remove("hidden");
+      } finally {
+        el("btnLogin").disabled = false;
+      }
+    });
+
+    function enterApp() {
+      const u = session.user;
+      el("secLogin").classList.add("hidden");
+      el("secApp").classList.remove("hidden");
+      el("userArea").classList.remove("hidden");
+      el("userArea").classList.add("flex");
+      el("badgeName").textContent = u.hoTen;
+      el("badgeRole").textContent = roleLabel(u);
+      el("welName").textContent = u.hoTen;
+      el("welInfo").textContent = [u.to, roleLabel(u)].filter(Boolean).join(" · ");
+      if (u.role === "HP" || u.role === "TRUONG_TO") el("tabTo").classList.remove("hidden");
+      if (u.role === "HP") el("tabAdmin").classList.remove("hidden");
+      setTab("ks");
+      if (!isHP()) loadDashboard();
+    }
+
+    async function logout() {
+      if (session) {
+        try { await call("dangXuat", session.token); } catch (e) { /* bỏ qua */ }
+      }
+      location.reload();
+    }
+
+    // ========== CHUYỂN TAB ==========
+    function setTab(name) {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+      document.querySelectorAll(".panel").forEach(p => p.classList.add("hidden"));
+      el("pnl-" + name).classList.remove("hidden");
+      if (name === "ks" && isHP()) loadHPOnline();
+      if (name === "cv" && isHP()) loadHPCongVan();
+      if (name === "to") {
+        if (isHP()) {
+          el("tlWrap").classList.add("hidden");
+          el("hpWrap").classList.remove("hidden");
+          loadHPTo();
+        } else {
+          el("hpWrap").classList.add("hidden");
+          el("tlWrap").classList.remove("hidden");
+          loadTeamSurveys();
+        }
+      }
+      if (name === "admin") loadAdmin();
+    }
+
+    // ========== TRANG CHÍNH GIÁO VIÊN ==========
+    async function loadDashboard() {
+      if (isHP()) return loadHPOnline();
+      try {
+        const res = await call("layDuLieuGiaoVien", session.token);
+        if (!res.success) return handleFail(res.message);
+        renderOnline(res.online);
+        renderCV(res.documents);
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    function badgeKS(k) {
+      if (k.daBaoCao) return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-bold">Đã báo cáo</span>';
+      if (k.quaHan) return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold">Quá hạn</span>';
+      return '<span class="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold">Chưa báo cáo</span>';
+    }
+
+    function renderOnline(list) {
+      if (!list.length) { el("listOnline").innerHTML = emptyBox("Hiện chưa có nội dung online nào."); return; }
+      el("listOnline").innerHTML = list.map(k => {
+        const isCT = k.loai === "Cuộc thi";
+        let action;
+        if (k.daBaoCao) {
+          action = k.linkMinhChung
+            ? `<a href="${esc(k.linkMinhChung)}" target="_blank" rel="noopener" class="flex-1 text-center py-2 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold">Xem minh chứng</a>`
+            : `<span class="flex-1 text-center py-2 text-xs font-bold text-emerald-700">Đã báo cáo</span>`;
+        } else {
+          action = `<button data-id="${esc(k.id)}" data-title="${esc(k.title)}" onclick="openReport(this)" class="flex-1 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold">Nộp minh chứng</button>`;
+        }
+        return `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          <div class="flex justify-between items-start gap-2">
+            <div class="min-w-0">
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold">${esc(k.loai)}</span>
+              <h4 class="font-bold text-sm mt-1">${esc(k.title)}</h4>
+            </div>
+            ${badgeKS(k)}
+          </div>
+          ${k.desc ? `<p class="text-xs text-slate-500 mt-1 whitespace-pre-line">${esc(k.desc)}</p>` : ""}
+          ${k.deadline ? `<p class="text-[11px] mt-2 ${k.quaHan ? "text-rose-600" : "text-slate-500"}">Hạn: ${esc(k.deadline)}</p>` : ""}
+          <div class="flex gap-2 mt-3">
+            ${k.link ? `<a href="${esc(k.link)}" target="_blank" rel="noopener" class="flex-1 text-center py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold">${isCT ? "Mở trang thi" : "Mở khảo sát"}</a>` : ""}
+            ${action}
+          </div>
+        </div>`;
+      }).join("");
+    }
+
+    let cvCache = [], cvFilter = "Tất cả";
+    const PHAN_LOAI_CV = ["TB nhà trường", "VB phổ biến PL", "Góp ý VB"];
+
+    function renderCVFilter() {
+      const count = f => f === "Tất cả" ? cvCache.length : cvCache.filter(d => d.phanLoai === f).length;
+      el("cvFilter").innerHTML = ["Tất cả"].concat(PHAN_LOAI_CV).map(f => `
+        <button data-f="${esc(f)}" onclick="setCVFilter(this.dataset.f)"
+                class="shrink-0 text-[11px] px-2.5 py-1.5 rounded-full font-bold border ${f === cvFilter ? "bg-blue-600 text-white border-blue-600" : "bg-white text-slate-600 border-slate-300"}">
+          ${esc(f)} (${count(f)})
+        </button>`).join("");
+    }
+
+    function setCVFilter(f) { cvFilter = f; renderCV(); }
+
+    function renderCV(all) {
+      if (all) cvCache = all;
+      renderCVFilter();
+      const list = cvFilter === "Tất cả" ? cvCache : cvCache.filter(d => d.phanLoai === cvFilter);
+      if (!list.length) { el("listCV").innerHTML = emptyBox("Không có công văn trong mục này."); return; }
+      el("listCV").innerHTML = list.map(d => `
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+          ${d.soHieu ? `<span class="text-[10px] px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold">${esc(d.soHieu)}</span>` : ""}
+          <h4 class="font-bold text-sm mt-1">${esc(d.title)}</h4>
+          ${d.desc ? `<p class="text-xs text-slate-500 mt-1">${esc(d.desc)}</p>` : ""}
+          <p class="text-[11px] text-slate-400 mt-2">Ngày đăng: ${esc(d.ngay)}</p>
+          ${d.link ? `<button data-id="${esc(d.id)}" onclick="openDoc(this)" class="block w-full text-center mt-3 py-2 rounded-lg bg-blue-600 text-white text-xs font-bold">Xem văn bản</button>` : ""}
+        </div>`).join("");
+    }
+
+    function emptyBox(msg) {
+      return `<div class="text-center text-xs text-slate-400 bg-white rounded-2xl p-6 border border-dashed border-slate-300">${esc(msg)}</div>`;
+    }
+
+    // ========== NỘP BÁO CÁO ==========
+    function openReport(btn) {
+      reportId = btn.dataset.id;
+      el("repTitle").textContent = btn.dataset.title;
+      el("repFile").value = "";
+      openModal("modalReport");
+    }
+
+    function readBase64(file) {
+      return new Promise((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result).split(",")[1]);
+        r.onerror = () => reject(new Error("Không đọc được file."));
+        r.readAsDataURL(file);
+      });
+    }
+
+    async function submitReport(e) {
+      e.preventDefault();
+      const btn = el("btnRep");
+      btn.disabled = true;
+      btn.textContent = "Đang gửi...";
+      try {
+        const file = el("repFile").files[0];
+        let b64 = "", mime = "";
+        if (file) {
+          if (file.size > 10 * 1024 * 1024) throw new Error("File vượt quá 10MB.");
+          mime = file.type;
+          b64 = await readBase64(file);
+        }
+        const res = await call("nopBaoCao", session.token, reportId, b64, mime);
+        if (!res.success) throw new Error(res.message);
+        closeModal("modalReport");
+        toast(res.message);
+        loadDashboard();
+      } catch (ex) {
+        handleFail(ex.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Gửi báo cáo";
+      }
+    }
+
+    // ========== ĐỔI MẬT KHẨU ==========
+    async function submitPass(e) {
+      e.preventDefault();
+      const moi = el("pwNew").value;
+      if (moi !== el("pwNew2").value) return alert("Mật khẩu mới nhập lại không khớp.");
+      try {
+        const res = await call("doiMatKhau", session.token, el("pwOld").value, moi);
+        if (!res.success) return alert(res.message);
+        closeModal("modalPass");
+        e.target.reset();
+        toast(res.message);
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    // ========== TỔ (TT, TP, HP) ==========
+    async function loadTeamSurveys() {
+      try {
+        const res = await call("layDanhSachKhaoSatQuanLy", session.token);
+        if (!res.success) return handleFail(res.message);
+        el("teamKS").innerHTML = '<option value="">-- Chọn khảo sát --</option>' +
+          res.surveys.map(k => `<option value="${esc(k.id)}">${esc(k.title)}</option>`).join("");
+        el("teamList").innerHTML = "";
+        el("teamSummary").textContent = "";
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function loadTeamMembers() {
+      const id = el("teamKS").value;
+      if (!id) { el("teamList").innerHTML = ""; el("teamSummary").textContent = ""; return; }
+      try {
+        const res = await call("layTienDoTo", session.token, id);
+        if (!res.success) return handleFail(res.message);
+        const done = res.members.filter(m => m.daBaoCao).length;
+        el("teamSummary").textContent = "Đã báo cáo " + done + "/" + res.members.length;
+        el("teamList").innerHTML = res.members.length ? res.members.map(m => `
+          <div class="bg-white rounded-xl p-3 border border-slate-200 flex justify-between items-center gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${esc(m.hoTen)} ${m.chucVu ? `<span class="text-blue-600">(${esc(m.chucVu)})</span>` : ""}</p>
+              <p class="text-[10px] text-slate-500">${esc(m.to)}${m.thoiGian ? " · " + esc(m.thoiGian) : ""}</p>
+            </div>
+            ${m.daBaoCao
+              ? (m.link ? `<a href="${esc(m.link)}" target="_blank" rel="noopener" class="text-[11px] text-emerald-700 font-bold">Minh chứng</a>` : '<span class="text-[11px] text-emerald-700 font-bold">Đã báo cáo</span>')
+              : '<span class="text-[11px] text-amber-600 font-bold">Chưa</span>'}
+          </div>`).join("") : emptyBox("Không có giáo viên nào trong phạm vi này.");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    // ========== QUẢN TRỊ (HP) ==========
+    async function loadAdmin() {
+      try {
+        const res = await call("layNoiDungQuanTri", session.token);
+        if (!res.success) return handleFail(res.message);
+
+        el("dsTo").innerHTML = res.danhSachTo.map(t => `<option value="${esc(t)}">`).join("");
+
+        const all = [...res.surveys, ...res.notices];
+        el("listQT").innerHTML = all.length ? all.map(x => `
+          <div class="flex items-center justify-between gap-2 bg-white p-3 rounded-xl border border-slate-200">
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${esc(x.title)}</p>
+              <p class="text-[10px] text-slate-500">${esc(x.loai)} · ${esc(x.trangThai)}</p>
+            </div>
+            <div class="flex gap-1.5 shrink-0">
+              <button data-kind="${x.kind}" data-id="${esc(x.id)}" onclick="openEdit(this)"
+                      class="text-[11px] px-2.5 py-1 rounded-lg font-bold bg-blue-50 text-blue-700">Sửa</button>
+              <button data-kind="${x.kind}" data-id="${esc(x.id)}" onclick="toggleItem(this)"
+                      class="text-[11px] px-2.5 py-1 rounded-lg font-bold ${x.trangThai === OPEN ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-700"}">
+                ${x.trangThai === OPEN ? "Thu hồi" : "Mở lại"}
+              </button>
+              <button data-id="${esc(x.id)}" onclick="deleteItem(this.dataset.id)"
+                      class="text-[11px] px-2.5 py-1 rounded-lg font-bold bg-slate-100 text-slate-600">Xóa</button>
+            </div>
+          </div>`).join("") : emptyBox("Chưa có nội dung nào.");
+
+        el("selExpKS").innerHTML = '<option value="ALL">Tất cả khảo sát</option>' +
+          res.surveys.map(k => `<option value="${esc(k.id)}">${esc(k.title)}</option>`).join("");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function toggleItem(btn) {
+      try {
+        const res = await call("doiTrangThai", session.token, btn.dataset.kind, btn.dataset.id);
+        if (!res.success) return alert(res.message);
+        toast(res.message);
+        if (isHP()) loadHPCongVan();
+        loadAdmin();
+        loadDashboard();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function submitKS(e) {
+      e.preventDefault();
+      const data = {
+        title: el("inKSTen").value,
+        desc: el("inKSMoTa").value,
+        link: el("inKSLink").value,
+        doiTuong: el("inKSDoiTuong").value,
+        deadline: el("inKSHan").value
+      };
+      try {
+        const res = await call("taoKhaoSat", session.token, data);
+        if (!res.success) return alert(res.message);
+        e.target.reset();
+        el("inKSDoiTuong").value = "Toàn trường";
+        toast(res.message);
+        loadAdmin();
+        loadDashboard();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function submitTB(e) {
+      e.preventDefault();
+      const data = {
+        loai: "Công văn",
+        phanLoai: el("selTBPhanLoai").value,
+        soHieu: el("inTBSoHieu").value,
+        title: el("inTBTieuDe").value,
+        desc: el("inTBMoTa").value,
+        link: el("inTBLink").value,
+        doiTuong: el("inTBDoiTuong").value,
+        deadline: el("inTBHan").value
+      };
+      try {
+        const res = await call("taoThongBao", session.token, data);
+        if (!res.success) return alert(res.message);
+        e.target.reset();
+        el("inTBDoiTuong").value = "Toàn trường";
+        toast(res.message);
+        loadAdmin();
+        loadDashboard();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    function togglePass() {
+      const inp = el("inMK");
+      const show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      el("eyeIcon").className = show ? "fa-regular fa-eye-slash text-sm" : "fa-regular fa-eye text-sm";
+    }
+
+    let editKind = "", editId = "";
+
+    async function openEdit(btn) {
+      try {
+        const res = await call("layChiTietMuc", session.token, btn.dataset.kind, btn.dataset.id);
+        if (!res.success) return alert(res.message);
+        const it = res.item;
+        editKind = it.kind;
+        editId = it.ma;
+        el("eSoHieu").value = it.soHieu;
+        el("eSoHieu").classList.toggle("hidden", it.kind === "KS");
+        el("eLoai").value = it.phanLoai || "";
+        el("eLoai").classList.toggle("hidden", it.loai !== "Công văn");
+        el("eTitle").value = it.title;
+        el("eDesc").value = it.desc;
+        el("eLink").value = it.link;
+        el("eDoiTuong").value = it.doiTuong;
+        el("eHan").value = it.deadline;
+        openModal("modalEdit");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function submitEdit(e) {
+      e.preventDefault();
+      const data = {
+        title: el("eTitle").value,
+        soHieu: el("eSoHieu").value,
+        phanLoai: el("eLoai").value,
+        desc: el("eDesc").value,
+        link: el("eLink").value,
+        doiTuong: el("eDoiTuong").value,
+        deadline: el("eHan").value
+      };
+      try {
+        const res = await call("suaMuc", session.token, editKind, editId, data);
+        if (!res.success) return alert(res.message);
+        closeModal("modalEdit");
+        toast(res.message);
+        loadAdmin();
+        loadDashboard();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    // ========== HIỆU PHÓ ==========
+    function isHP() { return !!(session && session.user && session.user.role === "HP"); }
+
+    async function loadHPOnline() {
+      try {
+        const res = await call("layOnlineThongKe", session.token);
+        if (!res.success) return handleFail(res.message);
+        el("listOnline").innerHTML = res.items.length ? res.items.map(it => {
+          const pct = it.total ? Math.round(it.done * 100 / it.total) : 0;
+          return `
+          <button data-id="${esc(it.id)}" onclick="openStats(this.dataset.id)"
+                  class="w-full text-left bg-white rounded-2xl p-4 shadow-sm border border-slate-200 hover:border-blue-300 transition">
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0">
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold">${esc(it.loai)}</span>
+                <h4 class="font-bold text-sm mt-1">${esc(it.title)}</h4>
+              </div>
+              ${it.trangThai === OPEN ? "" : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-bold">Đã thu hồi</span>'}
+            </div>
+            ${it.deadline ? `<p class="text-[11px] mt-1 ${it.quaHan ? "text-rose-600" : "text-slate-500"}">Hạn: ${esc(it.deadline)}</p>` : ""}
+            <div class="mt-3 flex items-center gap-2">
+              <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-2 bg-emerald-500" style="width:${pct}%"></div></div>
+              <span class="text-[11px] font-bold text-slate-600">${it.done}/${it.total}</span>
+            </div>
+          </button>`;
+        }).join("") : emptyBox("Chưa có nội dung online nào.");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function openStats(id) {
+      try {
+        const res = await call("layChiTietOnlineHP", session.token, id);
+        if (!res.success) return alert(res.message);
+        statCurrentId = id;
+        el("statTitle").textContent = res.title;
+        el("statOverall").textContent = "Toàn trường: " + res.done + "/" + res.total + " đã tham gia";
+        el("statList").innerHTML = res.theoTo.length ? res.theoTo.map(t => {
+          const pct = t.total ? Math.round(t.done * 100 / t.total) : 0;
+          return `
+          <div class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <div class="flex justify-between text-xs font-bold">
+              <span>${esc(t.to)}</span><span>${t.done}/${t.total}</span>
+            </div>
+            <div class="h-2 bg-white rounded-full overflow-hidden mt-2">
+              <div class="h-2 bg-emerald-500" style="width:${pct}%"></div>
+            </div>
+          </div>`;
+        }).join("") : emptyBox("Không có dữ liệu.");
+        openModal("modalStats");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function loadHPCongVan() {
+      try {
+        const res = await call("layCongVanHP", session.token);
+        if (!res.success) return handleFail(res.message);
+        el("listCV").innerHTML = res.items.length ? res.items.map(d => `
+          <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200">
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0">
+                ${d.soHieu ? `<span class="text-[10px] px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 font-bold">${esc(d.soHieu)}</span>` : ""}
+                <h4 class="font-bold text-sm mt-1">${esc(d.title)}</h4>
+              </div>
+              ${d.trangThai === OPEN ? "" : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 font-bold">Đã thu hồi</span>'}
+            </div>
+            ${d.desc ? `<p class="text-xs text-slate-500 mt-1">${esc(d.desc)}</p>` : ""}
+            <p class="text-[11px] text-slate-400 mt-2">${esc(d.ngayDang)} · ${esc(d.nguoiDang)} · ${esc(d.doiTuong)}</p>
+            <div class="flex gap-2 mt-3">
+              <button data-id="${esc(d.id)}" onclick="openDocStats(this.dataset.id)" class="flex-1 py-2 rounded-lg bg-emerald-600 text-white text-xs font-bold">Đã xem ${d.daXem}/${d.total}</button>
+              ${d.link ? `<a href="${esc(d.link)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold">Mở</a>` : ""}
+              <button data-kind="TB" data-id="${esc(d.id)}" onclick="toggleItem(this)"
+                      class="px-3 py-2 rounded-lg text-xs font-bold ${d.trangThai === OPEN ? "bg-rose-50 text-rose-600" : "bg-emerald-50 text-emerald-700"}">
+                ${d.trangThai === OPEN ? "Thu hồi" : "Mở lại"}
+              </button>
+              <button data-id="${esc(d.id)}" onclick="deleteItem(this.dataset.id)"
+                      class="px-3 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-600">Xóa</button>
+            </div>
+          </div>`).join("") : emptyBox("Chưa có công văn nào.");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function loadHPTo() {
+      el("hpTeamDetail").classList.add("hidden");
+      el("hpTeamList").classList.remove("hidden");
+      try {
+        const res = await call("layDanhSachTo", session.token);
+        if (!res.success) return handleFail(res.message);
+        el("hpTeamList").innerHTML = res.teams.length ? res.teams.map(t => `
+          <button data-to="${esc(t.to)}" onclick="openHPTeam(this.dataset.to)"
+                  class="w-full text-left bg-white rounded-xl p-3 border border-slate-200 hover:border-blue-300 flex justify-between items-center gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${esc(t.to)}</p>
+              <p class="text-[10px] text-slate-500 truncate">${esc(t.lanhDao || "Chưa có tổ trưởng")}</p>
+            </div>
+            <span class="text-[11px] font-bold text-slate-500 shrink-0">${t.soGV} GV</span>
+          </button>`).join("") : emptyBox("Chưa có tổ nào.");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function openHPTeam(to) {
+      el("hpTeamList").classList.add("hidden");
+      el("hpTeamDetail").classList.remove("hidden");
+      el("hpTeamName").textContent = to;
+      el("hpTeamName").dataset.to = to;
+      try {
+        const res = await call("layOnlineThongKe", session.token);
+        if (!res.success) return handleFail(res.message);
+        el("hpTeamItem").innerHTML = '<option value="ALL">Tổng hợp tất cả Online</option>' +
+          res.items.map(i => `<option value="${esc(i.id)}">${esc(i.title)}</option>`).join("");
+        loadHPTeamMembers();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    async function loadHPTeamMembers() {
+      const to = el("hpTeamName").dataset.to;
+      try {
+        const res = await call("layThanhVienTo", session.token, to, el("hpTeamItem").value);
+        if (!res.success) return handleFail(res.message);
+        const list = res.members;
+        const isAll = list.length > 0 && list[0].total !== undefined;
+        el("hpTeamSummary").textContent = isAll
+          ? "Số mục đã tham gia / tổng số mục"
+          : "Đã báo cáo " + list.filter(m => m.daBaoCao).length + "/" + list.length + " · " + res.title;
+        el("hpTeamMembers").innerHTML = list.length ? list.map(m => {
+          let status;
+          if (isAll) {
+            status = `<span class="text-[11px] font-bold ${m.done === m.total ? "text-emerald-700" : "text-slate-600"}">${m.done}/${m.total}</span>`;
+          } else if (m.daBaoCao) {
+            status = m.link
+              ? `<a href="${esc(m.link)}" target="_blank" rel="noopener" class="text-[11px] text-emerald-700 font-bold">Minh chứng</a>`
+              : '<span class="text-[11px] text-emerald-700 font-bold">Đã báo cáo</span>';
+          } else {
+            status = '<span class="text-[11px] text-amber-600 font-bold">Chưa</span>';
+          }
+          return `
+          <div class="bg-white rounded-xl p-3 border border-slate-200 flex justify-between items-center gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-bold truncate">${esc(m.hoTen)} ${m.chucVu ? `<span class="text-blue-600">(${esc(m.chucVu)})</span>` : ""}</p>
+              <p class="text-[10px] text-slate-500">${esc(m.taiKhoan)}${m.thoiGian ? " · " + esc(m.thoiGian) : ""}</p>
+            </div>
+            ${status}
+          </div>`;
+        }).join("") : emptyBox("Không có giáo viên nào trong tổ.");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    let statCurrentId = "";
+
+    async function deleteItem(id) {
+      if (!id) return;
+      if (!confirm("XÓA mục này khỏi hệ thống?\n\nMục sẽ biến mất khỏi danh sách và thống kê. Bài nộp minh chứng đã có vẫn còn trên Drive. Thao tác không hoàn tác được.")) return;
+      try {
+        const res = await call("xoaMuc", session.token, id);
+        if (!res.success) return alert(res.message);
+        closeModal("modalStats");
+        toast(res.message);
+        loadAdmin();
+        loadDashboard();
+        if (isHP()) loadHPCongVan();
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    // ========== LƯỢT XEM CÔNG VĂN ==========
+    async function openDoc(btn) {
+      // Mở tab trước để trình duyệt không chặn cửa sổ mới sau khi chờ server
+      const w = window.open("about:blank", "_blank");
+      try {
+        const res = await call("ghiLuotXem", session.token, btn.dataset.id);
+        if (!res.success) {
+          if (w) w.close();
+          return alert(res.message);
+        }
+        if (w) w.location.href = res.link;
+        else window.open(res.link, "_blank", "noopener");
+      } catch (ex) {
+        if (w) w.close();
+        handleFail(ex.message);
+      }
+    }
+
+    async function openDocStats(id) {
+      try {
+        const res = await call("layThongKeCongVan", session.token, id);
+        if (!res.success) return alert(res.message);
+        statCurrentId = id;
+        el("statTitle").textContent = (res.soHieu ? res.soHieu + " · " : "") + res.title;
+        el("statOverall").textContent = "Đã xem: " + res.done + "/" + res.total + " giáo viên";
+        el("statList").innerHTML = res.theoTo.length ? res.theoTo.map(t => {
+          const pct = t.total ? Math.round(t.done * 100 / t.total) : 0;
+          return `
+          <details class="bg-slate-50 rounded-xl p-3 border border-slate-200">
+            <summary class="cursor-pointer list-none">
+              <div class="flex justify-between text-xs font-bold"><span>${esc(t.to)}</span><span>${t.done}/${t.total}</span></div>
+              <div class="h-2 bg-white rounded-full overflow-hidden mt-2"><div class="h-2 bg-emerald-500" style="width:${pct}%"></div></div>
+            </summary>
+            <div class="mt-2 space-y-1">
+              ${t.members.map(m => `
+                <div class="flex justify-between gap-2 text-[11px] ${m.daXem ? "text-emerald-700" : "text-slate-400"}">
+                  <span class="truncate">${esc(m.hoTen)}</span>
+                  <span class="shrink-0">${m.daXem ? "✓ " + esc(m.thoiGian) : "Chưa xem"}</span>
+                </div>`).join("")}
+            </div>
+          </details>`;
+        }).join("") : emptyBox("Không có dữ liệu.");
+        openModal("modalStats");
+      } catch (ex) { handleFail(ex.message); }
+    }
+
+    // ========== CẬP NHẬT DỮ LIỆU ==========
+    async function refreshData() {
+      if (!session) return;
+      const icon = el("refreshIcon");
+      icon.classList.add("fa-spin");
+      try {
+        const tab = document.querySelector(".tab-btn.active").dataset.tab;
+        if (tab === "ks") {
+          await (isHP() ? loadHPOnline() : loadDashboard());
+        } else if (tab === "cv") {
+          await (isHP() ? loadHPCongVan() : loadDashboard());
+        } else if (tab === "to") {
+          if (isHP()) {
+            if (!el("hpTeamDetail").classList.contains("hidden")) await loadHPTeamMembers();
+            else await loadHPTo();
+          } else {
+            if (el("teamKS").value) await loadTeamMembers();
+            else await loadTeamSurveys();
+          }
+        } else if (tab === "admin") {
+          await loadAdmin();
+        }
+        toast("Đã cập nhật dữ liệu.");
+      } finally {
+        icon.classList.remove("fa-spin");
+      }
+    }
+
+    async function exportReport() {
+      const ma = el("selExpKS").value;
+      const fmt = el("selExpFmt").value;
+      const btn = el("btnExport");
+      btn.disabled = true;
+      btn.textContent = "Đang tạo file...";
+      try {
+        const res = await call("xuatBaoCao", session.token, ma, fmt);
+        if (!res.success) throw new Error(res.message);
+        downloadB64(res.data, res.filename, res.mime);
+      } catch (ex) {
+        handleFail(ex.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Xuất báo cáo";
+      }
+    }
+
+    function downloadB64(b64, filename, mime) {
+      const bin = atob(b64);
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type: mime }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1500);
+    }
+  </script>
+</body>
+</html>
